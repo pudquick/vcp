@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#include <unistd.h>
 #include "options.h"
 
 void print_usage();

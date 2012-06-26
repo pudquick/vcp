@@ -69,6 +69,7 @@ int build_list(int argc, int start, char *argv[])
     int     argfcount;
     struct  file *f_item, *f_item2;
     char    *dest, *dest_dir, *dest_base, *item;
+    char *buf = NULL;
     
     /* clean destination path */
     dest_dir = malloc(strlen(argv[argc-1])+1);
@@ -77,10 +78,14 @@ int build_list(int argc, int start, char *argv[])
     strcpy(dest_base, argv[argc-1]);
     dest_dir = dirname(dest_dir);
     dest_base = basename(dest_base);
-    dest_dir = realpath(dest_dir, NULL);
+    /* dest_dir = realpath(dest_dir, NULL); */
+    buf = malloc(PATH_MAX);
+    dest_dir = realpath(dest_dir, buf);
     if ((dest_dir = realloc(dest_dir, strlen(dest_dir)+1)) == NULL) {
         return -1;
     }
+    free(buf);
+    buf = NULL;
     dest = path_str(dest_dir, dest_base);
     
     /* logic checking (do not copy file/dir over dir/file) */
@@ -110,8 +115,12 @@ int build_list(int argc, int start, char *argv[])
     
     /* iterate through cmdline and insert items */
     if ((argfcount == 1) && (f_item == NULL || f_item->type == RFILE)) {
-        item = realpath(argv[start], NULL);
+        /* item = realpath(argv[start], NULL); */
+        buf = malloc(PATH_MAX);
+        item = realpath(argv[start], buf);
         item = realloc(item, strlen(item)+1);
+        free(buf);
+        buf = NULL;
         if (crawl(item, dest) != 0) {
             free(copy_list);
             return -1;
@@ -119,8 +128,12 @@ int build_list(int argc, int start, char *argv[])
     } else {
         for (int i=start; i<start+argfcount; i++) {
             /* clean item path */
-            item = realpath(argv[i], NULL);
+            /* item = realpath(argv[i], NULL); */
+            buf = malloc(PATH_MAX);
+            item = realpath(argv[i], buf);
             item = realloc(item, strlen(item)+1);
+            free(buf);
+            buf = NULL;
             /* crawl item */
             if (crawl(item, path_str(dest, basename(item))) != 0) {
                 free(copy_list);
